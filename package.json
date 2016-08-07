@@ -1,0 +1,31 @@
+{
+  "name": "image-storage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "bin/test",
+    "start": "bin/start"
+  },
+  "author": "Lavrentiev Sergey",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.0.1",
+    "bcrypt-nodejs": "0.0.3",
+    "bluebird": "^3.4.1",
+    "body-parser": "^1.15.2",
+    "connect-busboy": "0.0.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.14.0",
+    "express-session": "^1.14.0",
+    "fs-extra": "^0.30.0",
+    "mongoose": "^4.5.8",
+    "morgan": "^1.7.0",
+    "oauth2orize": "^1.4.0",
+    "passport": "^0.3.2",
+    "passport-http": "^0.3.0",
+    "passport-http-bearer": "^1.0.1",
+    "path": "^0.12.7",
+    "project-require": "^0.1.0"
+  }
+}

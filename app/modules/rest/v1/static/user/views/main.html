@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User uploader form</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.7/semantic.min.css" >
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+</head>
+<body>
+    <style type="text/css">
+        * {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        content {
+            margin: 10px 30px;
+            width: 500px;
+            /*height: 300px;*/
+            border: 1px;
+            display: block;
+            position: relative;
+        }
+    </style>
+
+    <content>
+    <h3 class="ui header">Download image here</h3>
+    <div class="ui segment">
+        <div class="ui form">
+        <form method="POST" class="ui form" action="/api/image/upload" id="form1" enctype="multipart/form-data">
+            <div class="field">
+                <label>Enter you comment to file...</label>
+                <textarea id='comment' name='comment'></textarea>
+            </div>
+            <input type="file" name="fileUploaded" size="40" class="ui button" id='file'>
+            <br/>
+            <br/>
+            <!-- <input class="ui primary button" type="submit" text='Send'> -->
+            <submit class="ui primary button" id='submit' >Send</submit>
+        </form>
+    </div>
+    </content>
+</body>
+<script>
+    $(document).ready(function(){
+        // click on button submit
+        $("#submit").on('click', function(){
+
+            // var files = $('#file').get(0).files;
+            // var files = document.getElementById('file').files;
+            console.log($("#form1").serialize());
+            // console.log($('#comment').val());
+            // console.log(files);
+            // console.log(files[0]);
+            // if(files.length == 0) {
+            //     alert('Please, choose a file');
+            // }
+            // else {
+                // var formData = new FormData();
+                // formData.append("comment", $('#comment').val());
+                // formData.append("file", files[0]);
+                // console.log(formData);
+                // send ajax
+                // var request = new XMLHttpRequest();
+                // request.open("POST", "/api/image/upload", true);
+                // request.send(formData);
+                $.ajax({
+                    url: '/api/image/upload', // url where to submit the request
+                    type : "POST", // type of action POST || GET
+                    dataType : 'json', // data type
+                      // processData: false,  // tell jQuery not to process the data
+                      // contentType: false,   // tell jQuery not to set contentType
+                    // data : formData, // post data || get data
+                    data : $("#form1").serialize(), // post data || get data
+                    success : function(result) {
+                        // you can see the result from the console
+                        // tab of the developer tools
+                        console.log(result);
+                    },
+                    error: function(xhr, resp, text) {
+                        console.log(xhr, resp, text);
+                    }
+                })
+            // }
+        });
+    });
+
+</script>
+</html>
