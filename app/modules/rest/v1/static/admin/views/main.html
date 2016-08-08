@@ -1,16 +1,94 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Control panel of imageStorage</title>
-    </head>
-    <body>
-        <form action="/api/oauth2/authorize" method="post">
-            <input name="transaction_id" type="hidden" value="<%= transactionID %>">
-            <div>
-              <input type="submit" value="Allow" id="allow">
-              <input type="submit" value="Deny" name="cancel" id="deny">
-            </div>
-        </form>
+<head>
+  <!-- Standard Meta -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-    </body>
+  <!-- Site Properties -->
+  <title>imageStorage - control panel - login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.7/semantic.min.css" >
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.2/js.cookie.min.js"></script>
+
+  <style type="text/css">
+    body {
+      background-color: #DADADA;
+    }
+    body > .grid {
+      height: 100%;
+    }
+    .image {
+      margin-top: -100px;
+    }
+    .column {
+      max-width: 450px;
+    }
+  </style>
+  <script>
+  $(document)
+    .ready(function() {
+        $("#submit").on('click', function(){
+            console.log('alalal');
+            $.ajax({
+                url: '/api/token/', 
+                type : "POST", 
+                dataType : 'json', 
+                data : {
+                    username: $('#username').val(),
+                    password: $('#password').val(),
+                    grant_type: 'password',
+                    client_id: 'admin_id',
+                    client_secret: 'admin_secret'
+                },
+                success : function(result) {
+                    if(result) {
+                        if(result.access_token) {
+                            Cookies.set('access_token', result.access_token);
+                            window.location.replace("/admin/images");
+                        }
+                    }
+                    console.log(result);
+                },
+                error: function(xhr, resp, text) {
+                    console.log(xhr, resp, text);
+                }
+            })
+        });
+    })
+  ;
+  </script>
+</head>
+<body>
+
+<div class="ui middle aligned center aligned grid">
+  <div class="column">
+    <form class="ui large form" id='login'>
+      <div class="ui stacked segment">
+        <div class="field">
+          <div class="ui left icon input">
+            <i class="user icon"></i>
+            <input type="text" name="username" placeholder="Login" id='username'>
+          </div>
+        </div>
+        <div class="field">
+          <div class="ui left icon input">
+            <i class="lock icon"></i>
+            <input type="password" name="password" placeholder="Password" id='password'>
+          </div>
+        </div>
+        <submit class="ui fluid large teal submit button" id='submit'>Login</submit>
+      </div>
+
+      <div class="ui error message"></div>
+
+    </form>
+
+  </div>
+</div>
+
+</body>
+
 </html>

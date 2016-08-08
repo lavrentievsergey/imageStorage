@@ -20,5 +20,6 @@ app
     .use('/admin', v1Module.admin)
     .use('/api/image', v1Module.image)
     .use('/api/user', v1Module.user)
+    .use('/api/token', v1Module.token)
     .use('/api/client', v1Module.client)
 ;

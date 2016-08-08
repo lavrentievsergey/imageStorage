@@ -7,6 +7,6 @@ let actions = {
     user: require(__dirname + '/user'),
 };
 
-app.use('/user', actions.user);
+app.use(actions.user);
 
 

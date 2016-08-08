@@ -11,50 +11,48 @@ let Image = load('/app/models').Image;
 
 app.use(busboy());
 
+app.route('/')
+    .post((req, res) => {
+		let image = new Image();
+		image.userAgent = req.headers['user-agent'];
+		image.uuid = req.body.uuid;
+		image.comment = req.body.comment;
+		image.save(err => {
+			if (err) console.log(err);
+			else res.send(image);
+		});
+    });
+
 app.route('/upload')
-    .post((req, res, next) => {
+    .post((req, res) => {
     	let fstream,
     		filePath,
     		fileURL;
-    	console.log(req.headers);
-    	console.log(req.query);
-    	console.log(req.params);
-    	console.log(req.body);
-    	// console.log(req);
-    	console.log(Object.keys(req.body).length);
+    	console.log(req.cookies);
+    	console.log(req.cookies.uuid);
+    	console.log(req.cookies.fileId);
 
         if (req.busboy) {
-        	let image = new Image();
-        	console.log(1);
-	    	if (Object.keys(req.body).length > 0) {
-	    		console.log(2);
-	    		image.userAgent = req.headers['user-agent'];
-	    	};
-	    	console.log(3);
-	    	if (req.body.comment) {
-	    		console.log(4);
-				image.comment = req.body.comment;
-				console.log(image);
-				image.save(err => {
-					if (err) console.log(err);
-				});
-	    	}
-        	// console.log(image);
-        	// console.log(req.busboy);
-	        req.pipe(req.busboy);
-	        req.busboy.on('file', (fieldname, file, filename) => {
-	        	if (!filename) res.status(400).send({ message: 'Incorrect request' });
+        	Image.findOne({_id: req.cookies.fileId, uuid: req.cookies.uuid}, (err, image) => {
+        		console.log(image);
+		        req.pipe(req.busboy);
+		        req.busboy.on('file', (fieldname, file, filename) => {
+		        	if (!filename) res.status(400).send({ message: 'Incorrect request' });
 
-	        	console.log(filename);
-	        	filePath = '/' + filename + '-' + Date.now();
-	        	fileURL = req.headers.origin + filePath;
-	            fstream = fs.createWriteStream(uploadDir + filePath);
-	            file.pipe(fstream);
-	            fstream.on('close', () => {
-	                res.redirect(req.headers.referer);
-	                // res.send({ status: 200, path: fileURL });
-	            });
-	        });
+		        	console.log(filename);
+		        	filePath = '/' + filename + '-' + Date.now();
+		        	fileURL = req.headers.origin + filePath;
+		            fstream = fs.createWriteStream(uploadDir + filePath);
+		            file.pipe(fstream);
+		            fstream.on('close', () => {
+		            	image.path = fileURL;
+		            	image.save(err => {
+							if (err) res.status(500).send();
+							else res.redirect(req.headers.referer);
+						});
+		            });
+		        });
+        	});
         }
         else {
         	res.status(400).send({ message: 'Incorrect request' });

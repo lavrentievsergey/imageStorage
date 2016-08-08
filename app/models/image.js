@@ -3,9 +3,9 @@
 let mongoose = require('mongoose');
 
 let ImageSchema = new mongoose.Schema({
-	name: String,
 	path: String,
 	comment: String,
+	uuid: String,
 	userAgent: String
 });
 

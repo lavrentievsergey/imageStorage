@@ -31,10 +31,12 @@ UserSchema.pre('save', function(callback) {
     });
 });
 
-UserSchema.methods.verifyPassword = function(password, cb) {
-    bcrypt.compare(password, this.password, (err, isMatch) => {
-        if (err) return cb(err);
-        cb(null, isMatch);
+UserSchema.methods.verifyPassword = function(password) {
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(password, this.password, (err, isMatch) => {
+            if (err) return reject(err);
+            return resolve(isMatch);
+        });
     });
 };
 

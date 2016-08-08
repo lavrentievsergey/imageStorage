@@ -33,15 +33,14 @@ passport.use(new BearerStrategy(
             }
 
             Client.findOne({ id: token.clientId }, (err, client) => {
-                if (err) return callback(err);
+                if (err) return done(err);
+                if (!client) return done(null, false);
 
-                if (!client) return callback(null, false);
-                User.findOne({ id: token.userId }, (err, user) => {
-                    if (err) return callback(err);
+                User.findOne({ _id: token.userId }, (err, user) => {
+                    if (err) return done(err);
+                    if (!user) return done(null, false);
 
-                    if (!user) return callback(null, false);
-
-                    callback(null, user, { scope: '*' });
+                    done(null, user, { scope: '*' });
                 });
             });
         });

@@ -9,3 +9,7 @@ app.set('views', __dirname + '/views');
 app.get('/', (req,res) => {
     res.sendFile(path.resolve(app.settings.views + '/main.html'));
 });
+
+app.get('/images', (req,res) => {
+    res.sendFile(path.resolve(app.settings.views + '/images_list.html'));
+});

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.7/semantic.min.css" >
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.2/js.cookie.min.js"></script>
 
 </head>
 <body>
@@ -24,13 +25,25 @@
             display: block;
             position: relative;
         }
+        body {
+          background-color: #DADADA;
+        }
+        body > .grid {
+          height: 100%;
+        }
+        .image {
+          margin-top: -100px;
+        }
+        .column {
+          max-width: 450px;
+        }
     </style>
 
     <content>
     <h3 class="ui header">Download image here</h3>
     <div class="ui segment">
         <div class="ui form">
-        <form method="POST" class="ui form" action="/api/image/upload" id="form1" enctype="multipart/form-data">
+        <form method="POST" class="ui form" action="/api/image/upload" id="form" enctype="multipart/form-data">
             <div class="field">
                 <label>Enter you comment to file...</label>
                 <textarea id='comment' name='comment'></textarea>
@@ -45,48 +58,47 @@
     </content>
 </body>
 <script>
-    $(document).ready(function(){
+    $(document).ready(function() {
+        var uuid = Cookies.get('uuid');
+        if (!uuid) {
+            uuid = generateUUID();
+            Cookies.set('uuid', uuid);
+        }
         // click on button submit
         $("#submit").on('click', function(){
-
-            // var files = $('#file').get(0).files;
-            // var files = document.getElementById('file').files;
-            console.log($("#form1").serialize());
-            // console.log($('#comment').val());
-            // console.log(files);
-            // console.log(files[0]);
-            // if(files.length == 0) {
-            //     alert('Please, choose a file');
-            // }
-            // else {
-                // var formData = new FormData();
-                // formData.append("comment", $('#comment').val());
-                // formData.append("file", files[0]);
-                // console.log(formData);
-                // send ajax
-                // var request = new XMLHttpRequest();
-                // request.open("POST", "/api/image/upload", true);
-                // request.send(formData);
+            var files = document.getElementById('file').files;
+            if(files.length == 0) {
+                alert('Please, choose a file');
+            }
+            else {
                 $.ajax({
-                    url: '/api/image/upload', // url where to submit the request
-                    type : "POST", // type of action POST || GET
-                    dataType : 'json', // data type
-                      // processData: false,  // tell jQuery not to process the data
-                      // contentType: false,   // tell jQuery not to set contentType
-                    // data : formData, // post data || get data
-                    data : $("#form1").serialize(), // post data || get data
+                    url: '/api/image', 
+                    type : "POST", 
+                    dataType : 'json', 
+                    data : {
+                        uuid: uuid,
+                        comment: $('#comment').val()
+                    }, 
                     success : function(result) {
-                        // you can see the result from the console
-                        // tab of the developer tools
-                        console.log(result);
+                        Cookies.set('fileId', result._id);
+                        $("#form").submit(); // send file
                     },
                     error: function(xhr, resp, text) {
                         console.log(xhr, resp, text);
                     }
                 })
-            // }
+            }
         });
     });
+    function generateUUID() {
+        var d = new Date().getTime();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (d + Math.random()*16)%16 | 0;
+            d = Math.floor(d/16);
+            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+        });
+        return uuid;
+    };
 
 </script>
 </html>

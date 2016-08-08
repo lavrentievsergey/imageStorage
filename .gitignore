@@ -1,0 +1,11 @@
+node_modules
+.idea
+.iml
+.DS_Store
+reports
+.vagrant
+tasks.txt
+config/local.json
+*.sublime-project
+*.sublime-workspace
+npm-debug.log

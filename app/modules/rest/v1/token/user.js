@@ -2,24 +2,24 @@
 
 let express = require('express'),
 	app = module.exports = express(),
-	crypto = require('crypto');
+	crypto = require('crypto'),
+    load = require('project-require');
+
+let User   = load('/app/models').User,
+    Client = load('/app/models').Client,
+    Token  = load('/app/models').Token;
 
 app.post('/', (req, res) => {
 	return createContext(req)
     .then(checkClient)
-    .then(handleGrantType)
     .then(checkUser)
+    .then(handleGrantType)
     .then(context => {
         if (context.error) {
             return Promise.reject(context.error);
         }
 
-        return loggingAttempt({
-            context: context,
-            successful: true
-        }).then(() => {
-            res.send(context.token);
-        });
+        return res.send(context.token);
     })
     .catch(err => {
         if (!err.error) {
@@ -33,7 +33,7 @@ app.post('/', (req, res) => {
 
 function createContext(req) {
     return new Promise((resolve, reject) => {
-        let body   = req.body;
+        let body = req.body;
 
         let context = {
             grant       : body.grant_type,
@@ -55,31 +55,56 @@ function createContext(req) {
 }
 
 function checkClient(context) {
-    Client.findOne({ id: context.clientId, secret: context.secret }, (err, client) => {
-        if (err) return context.error = err;
+    return new Promise((resolve, reject) => {
+        Client.findOne({ id: context.clientId, secret: context.secret }, (err, client) => {
+            if (err) {
+                context.error = err;
+                return reject(context.error);
+            }
 
-        if (!client) return context.error = {status: 400};
+            if (!client) {
+                context.error = {status: 400};
+                return reject(context.error);
+            }
 
-		context.client = client;
-        return context;
+    		context.client = client;
+            return resolve (context);
 
+        });
     });
 }
 
+function handleGrantType(context) {
+    if (context.error) {
+        return Promise.reject(context.error);
+    }
+
+    return Promise.resolve(handlerGrantType[context.grant](context));
+}
+
 function checkUser(context) {
-    User.findOne({ username: context.user.username }, (err, user) => {
-        if (err) return context.error = err;
+    return new Promise((resolve, reject) => {
+        if (context.error) return reject(context);
 
-        if (!user) return context.error = {status: 400};
+        User.findOne({ username: context.user.username }, (err, user) => {
+            if (err) {
+                context.error = err;
+                return reject(context.error);
+            }
 
-        if (!user.verifyPassword(context.user.password)) {
-        	context.error = { message: 'wrong password' };
-        	return context;
-        }
+            if (!user) {
+                context.error = {status: 400};
+                return reject(context.error);
+            }
 
-		context.user = user;
-        return context;
+            if (!user.verifyPassword(context.user.password)) {
+            	context.error = { message: 'wrong password' };
+            	return reject(context.error);
+            }
 
+    		context.user = user;
+            return resolve(context);
+        });
     });
 }
 
@@ -114,18 +139,15 @@ let handlerGrantType = {
 }
 
 function destroyToken(model, clientId, userId) {
-    model.find({ userId: userId, clientId: clientId }, (err, data) => {
-    	if (data) data.remove();
-
-    	return true; 
-    });
+    model.find({ userId: userId, clientId: clientId }).remove().exec();
+    return true; 
 }
 
 function createToken(model, token, clientId, userId) {
 	let accessToken = new Token({
-	    value: value,
-	    clientId: clientId,
-	    userId: userId
+        value   : token,
+        clientId: clientId,
+        userId  : userId
   	});
 
 	accessToken.save((err, data) => {
